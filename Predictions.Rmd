@@ -30,7 +30,7 @@ head(data)
 
 # Turning Diabetes column into binary 
 data$diabetes = ifelse(data$diabetes == "pos", 1, 0)
-data$diabetest = as.factor(data$diabetes)
+data$diabetes = as.factor(data$diabetes)
 
 # Check for NAs in columns
 apply(data, 2, function(x) sum(is.na(x)))
@@ -116,26 +116,33 @@ test_scaled = scaled[-index,]
 # This example has two hidden layers; 5 and 3 nodes.
 n = names(train_scaled)
 f = as.formula(paste("diabetes ~", paste(n[!n %in% "diabetes"], collapse = " + ")))
-nn = neuralnet(f, data = train_scaled, hidden = 6, linear.output = F)
+
+nn = neuralnet(f, data = train_scaled, hidden = 8, linear.output = F)
 
 # Making neural net predictions
-pred_nn_unscaled = compute(nn, test_scaled[,1:8])
-pred_nn_prob = ifelse(pred_nn_unscaled$net.result*(max(data$diabetes) - min(data$diabetes)) + min(data$diabetes) >= 0.5, 1, 0)
+nn_prob = ifelse(compute(nn, test_scaled[,1:8])$net.result >= 0.5, 1, 0)
 
-table(test$diabetes, pred_nn_prob, dnn = c("No Diabetes", "Diabetes"))
+confusionMatrix(data = test$diabetes, nn_prob)
 
-# Accuracy Rate
-(80+34)/(length(pred_nn_prob)) # 74.025%
+# Accuracy Rate with hidden layer of 6
+(83+42)/(length(pred_nn_prob)) # 81.17%
+
+# Accuracy Rate with hidden layer of 8
+(85+47)/(length(pred_nn_prob)) # 85.71%
+
+nn2 = train(f, data = train_scaled, method='neuralnet', tuneGrid = expand.grid(.layer1=c(6), .layer2 = c(0), .layer3 = c(0)), linear.output = F)
 ```
 Accuracy rate has fallen with a neural net
 
 Neural Net v2
 ```{r}
 #Fit model
-nn2 = train(diabetes~., train_scaled, method='nnet', linout=TRUE, trace = FALSE,
+library(caret)
+nn2 = train(diabetes~., train, method='nnet', linout=FALSE, trace = FALSE,
                 #Grid of tuning parameters to try:
                 tuneGrid=expand.grid(.size=6,.decay=c(0,0.001,0.1))) 
 
 temp = predict(nn2, test_scaled)
+pred_nn_prob = temp*(max(data$diabetes) - min(data$diabetes)) + min(data$diabetes) 
 table(test$diabetes, temp, dnn = c("No Diabetes", "Diabetes"))
 ```
