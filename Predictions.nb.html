@@ -209,12 +209,102 @@ table(test$diabetes, pred_linear, dnn = c(&quot;No Diabetes&quot;, &quot;Diabete
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
+<p>Started off with an accuracy rate of around 77 percent.</p>
 <p>Cross-valided Linear Regression</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShjYXJldClcbiMgU2V0IGNvbnRyb2wgcGFyYW1ldGVycyBmb3IgdHJhaW5cbmxtX2N0cmwgPSB0cmFpbkNvbnRyb2wobWV0aG9kID0gXCJjdlwiLCBudW1iZXIgPSAxMClcblxuIyBCdWlsZCBjcm9zcy12YWxpZGF0ZWQgbGluZWFyIG1vZGVsXG5jdi5saW5lYXIgPSB0cmFpbihkaWFiZXRlc34uLCBkYXRhID0gdHJhaW4sIG1ldGhvZCA9IFwibG1cIiwgdHJDb250cm9sID0gbG1fY3RybClcblxuIyBNYWtpbmcgcHJlZGljdGlvbnNcbnByZWRfY3YubGluZWFyID0gaWZlbHNlKHByZWRpY3QoY3YubGluZWFyLCB0ZXN0KSA+PSAwLjUsIDEsIDApXG5cbiMgQ29uZnVzaW9uIG1hdHJpeFxudGFibGUodGVzdCRkaWFiZXRlcywgcHJlZF9jdi5saW5lYXIsIGRubiA9IGMoXCJObyBEaWFiZXRlc1wiLCBcIkRpYWJldGVzXCIpKVxuXG4jIEFjY3VyYWN5IFJhdGUgaXMgdGhlIHNhbWUgYXMgYmFzaWMgbGluZWFyIHJlZ3Jlc3Npb25cbmBgYCJ9 -->
+<pre class="r"><code>library(caret)
+# Set control parameters for train
+lm_ctrl = trainControl(method = &quot;cv&quot;, number = 10)
+
+# Build cross-validated linear model
+cv.linear = train(diabetes~., data = train, method = &quot;lm&quot;, trControl = lm_ctrl)
+
+# Making predictions
+pred_cv.linear = ifelse(predict(cv.linear, test) &gt;= 0.5, 1, 0)
+
+# Confusion matrix
+table(test$diabetes, pred_cv.linear, dnn = c(&quot;No Diabetes&quot;, &quot;Diabetes&quot;))
+
+# Accuracy Rate is the same as basic linear regression</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Same accuracy rate as regular linear regression. On to more advanced techniques.</p>
+<p>Random Forest</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShyYW5kb21Gb3Jlc3QpXG5cbiMgU3BsaXR0aW5nIGRhdGEgaW50byB4IGFuZCB5IG1hdHJpY2VzXG50cmFpbl95ID0gdHJhaW5bLDldXG50cmFpbl94ID0gdHJhaW5bLC05XVxuXG4jIEJ1aWxkaW5nIGEgcmFuZG9tIGZvcmVzdFxuckZvcmVzdCA9IHJhbmRvbUZvcmVzdChkaWFiZXRlcyB+IC4sIGRhdGEgPSB0cmFpbilcblxuIyBNYWtpbmcgcHJlZGljdGlvbnNcbnByZWRfcmYgPSBpZmVsc2UocHJlZGljdChyRm9yZXN0LCB0ZXN0KSA+PSAwLjUsIDEsIDApXG5cbiMgQ29uZnVzaW9uIE1hdHJpeFxudGFibGUodGVzdCRkaWFiZXRlcywgcHJlZF9yZiwgZG5uID0gYyhcIk5vIERpYWJldGVzXCIsIFwiRGlhYmV0ZXNcIikpXG5cbiMgQWNjdXJhY3kgUmF0ZVxuKDg3KzM1KS8obGVuZ3RoKHByZWRfcmYpKVxuYGBgIn0= -->
+<pre class="r"><code>library(randomForest)
+
+# Splitting data into x and y matrices
+train_y = train[,9]
+train_x = train[,-9]
+
+# Building a random forest
+rForest = randomForest(diabetes ~ ., data = train)
+
+# Making predictions
+pred_rf = ifelse(predict(rForest, test) &gt;= 0.5, 1, 0)
+
+# Confusion Matrix
+table(test$diabetes, pred_rf, dnn = c(&quot;No Diabetes&quot;, &quot;Diabetes&quot;))
+
+# Accuracy Rate
+(87+35)/(length(pred_rf))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Up to a 79% accuracy rate with random forests.</p>
+<p>Neural Net</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShuZXVyYWxuZXQpXG5cbiMgU2NhbGluZyBEYXRhXG5tYXhzID0gYXBwbHkoZGF0YSwgMiwgbWF4KVxubWlucyA9IGFwcGx5KGRhdGEsIDIsIG1pbilcblxuc2NhbGVkID0gYXMuZGF0YS5mcmFtZShzY2FsZShkYXRhLCBjZW50ZXIgPSBtaW5zLCBzY2FsZSA9IG1heHMgLSBtaW5zKSlcblxudHJhaW5fc2NhbGVkID0gc2NhbGVkW2luZGV4LF1cbnRlc3Rfc2NhbGVkID0gc2NhbGVkWy1pbmRleCxdXG5cbiMgQnVpbGRpbmcgYSBuZXVyYWwgbmV0XG4jIFRoaXMgZXhhbXBsZSBoYXMgdHdvIGhpZGRlbiBsYXllcnM7IDUgYW5kIDMgbm9kZXMuXG5uID0gbmFtZXModHJhaW5fc2NhbGVkKVxuZiA9IGFzLmZvcm11bGEocGFzdGUoXCJkaWFiZXRlcyB+XCIsIHBhc3RlKG5bIW4gJWluJSBcImRpYWJldGVzXCJdLCBjb2xsYXBzZSA9IFwiICsgXCIpKSlcbm5uID0gbmV1cmFsbmV0KGYsIGRhdGEgPSB0cmFpbl9zY2FsZWQsIGhpZGRlbiA9IDYsIGxpbmVhci5vdXRwdXQgPSBGKVxuXG4jIE1ha2luZyBuZXVyYWwgbmV0IHByZWRpY3Rpb25zXG5wcmVkX25uX3Vuc2NhbGVkID0gY29tcHV0ZShubiwgdGVzdF9zY2FsZWRbLDE6OF0pXG5wcmVkX25uX3Byb2IgPSBpZmVsc2UocHJlZF9ubl91bnNjYWxlZCRuZXQucmVzdWx0KihtYXgoZGF0YSRkaWFiZXRlcykgLSBtaW4oZGF0YSRkaWFiZXRlcykpICsgbWluKGRhdGEkZGlhYmV0ZXMpID49IDAuNSwgMSwgMClcblxudGFibGUodGVzdCRkaWFiZXRlcywgcHJlZF9ubl9wcm9iLCBkbm4gPSBjKFwiTm8gRGlhYmV0ZXNcIiwgXCJEaWFiZXRlc1wiKSlcblxuIyBBY2N1cmFjeSBSYXRlXG4oODArMzQpLyhsZW5ndGgocHJlZF9ubl9wcm9iKSkgIyA3NC4wMjUlXG5gYGAifQ== -->
+<pre class="r"><code>library(neuralnet)
+
+# Scaling Data
+maxs = apply(data, 2, max)
+mins = apply(data, 2, min)
+
+scaled = as.data.frame(scale(data, center = mins, scale = maxs - mins))
+
+train_scaled = scaled[index,]
+test_scaled = scaled[-index,]
+
+# Building a neural net
+# This example has two hidden layers; 5 and 3 nodes.
+n = names(train_scaled)
+f = as.formula(paste(&quot;diabetes ~&quot;, paste(n[!n %in% &quot;diabetes&quot;], collapse = &quot; + &quot;)))
+nn = neuralnet(f, data = train_scaled, hidden = 6, linear.output = F)
+
+# Making neural net predictions
+pred_nn_unscaled = compute(nn, test_scaled[,1:8])
+pred_nn_prob = ifelse(pred_nn_unscaled$net.result*(max(data$diabetes) - min(data$diabetes)) + min(data$diabetes) &gt;= 0.5, 1, 0)
+
+table(test$diabetes, pred_nn_prob, dnn = c(&quot;No Diabetes&quot;, &quot;Diabetes&quot;))
+
+# Accuracy Rate
+(80+34)/(length(pred_nn_prob)) # 74.025%</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Accuracy rate has fallen with a neural net</p>
+<p>Neural Net v2</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubm4yID0gdHJhaW4oZGlhYmV0ZXN+LiwgdHJhaW5fc2NhbGVkLCBtZXRob2Q9J25uZXQnLCBsaW5vdXQ9VFJVRSwgdHJhY2UgPSBGQUxTRSxcbiAgICAgICAgICAgICAgICAjR3JpZCBvZiB0dW5pbmcgcGFyYW1ldGVycyB0byB0cnk6XG4gICAgICAgICAgICAgICAgdHVuZUdyaWQ9ZXhwYW5kLmdyaWQoLnNpemU9NiwuZGVjYXk9YygwLDAuMDAxLDAuMSkpKSBcblxuYGBgIn0= -->
+<pre class="r"><code>nn2 = train(diabetes~., train_scaled, method='nnet', linout=TRUE, trace = FALSE,
+                #Grid of tuning parameters to try:
+                tuneGrid=expand.grid(.size=6,.decay=c(0,0.001,0.1))) 
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWW91IGFyZSB0cnlpbmcgdG8gZG8gcmVncmVzc2lvbiBhbmQgeW91ciBvdXRjb21lIG9ubHkgaGFzIHR3byBwb3NzaWJsZSB2YWx1ZXMgQXJlIHlvdSB0cnlpbmcgdG8gZG8gY2xhc3NpZmljYXRpb24/IElmIHNvLCB1c2UgYSAyIGxldmVsIGZhY3RvciBhcyB5b3VyIG91dGNvbWUgY29sdW1uLlxuIn0= -->
+<pre><code>You are trying to do regression and your outcome only has two possible values Are you trying to do classification? If so, use a 2 level factor as your outcome column.</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIlIgTm90ZWJvb2siDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQpHb2FsOiBQcmVkaWN0IERpYWJldGVzIEluY2lkZW5jZSBpbiBQaW1hIEluZGlhbnMNCg0KRGF0YSBMb2FkaW5nDQpgYGB7cn0NCmxpYnJhcnkoIm1sYmVuY2giKQ0KZGF0YSgiUGltYUluZGlhbnNEaWFiZXRlcyIpDQoNCiMgUmVuYW1lIERhdGENCmRhdGEgPSBQaW1hSW5kaWFuc0RpYWJldGVzDQoNCiMgU2V0IFNlZWQNCnNldC5zZWVkKDQxNSkNCg0KIyBTcGxpdCB0cmFpbmluZyBhbmQgdGVzdA0KaW5kZXggPSBzYW1wbGUoMTpucm93KGRhdGEpLCByb3VuZCgwLjgqbnJvdyhkYXRhKSkpDQp0cmFpbiA9IGRhdGFbaW5kZXgsXQ0KdGVzdCA9IGRhdGFbLWluZGV4LF0NCmBgYA0KDQpEYXRhIEluc3BlY3Rpb24NCmBgYHtyfQ0KIyBEYXRhIFByZXZpZXcNCmhlYWQoZGF0YSkNCg0KIyBUdXJuaW5nIERpYWJldGVzIGNvbHVtbiBpbnRvIGJpbmFyeSANCmRhdGEkZGlhYmV0ZXMgPSBpZmVsc2UoZGF0YSRkaWFiZXRlcyA9PSAicG9zIiwgMSwgMCkNCg0KIyBDaGVjayBmb3IgTkFzIGluIGNvbHVtbnMNCmFwcGx5KGRhdGEsIDIsIGZ1bmN0aW9uKHgpIHN1bShpcy5uYSh4KSkpDQoNCiMgRGVzY3JpcHRpdmUgTWVhc3VyZXMNCnN1bShkYXRhJGRpYWJldGVzID09IDApICMgNTAwIG9icw0Kc3VtKGRhdGEkZGlhYmV0ZXMgPT0gMSkgIyAyNjggb2JzDQpgYGANCg0KTW9kZWxpbmcNCg0KQmFzaWMgTGluZWFyIFJlZ3Jlc3Npb24NCmBgYHtyfQ0KIyBCdWlsZCBiYXNpYyBsaW5lYXIgcmVncmVzc2lvbg0KbGluZWFyID0gbG0oZGlhYmV0ZXMgfi4sIHRyYWluKQ0KDQojIE1ha2UgUHJlZGljdGlvbnMgZnJvbSBiYXNpYyBsaW5lYXIgbW9kZWwNCnByZWRfbGluZWFyID0gaWZlbHNlKHByZWRpY3QobGluZWFyLCB0ZXN0LCB0eXBlID0gInJlc3BvbnNlIikgPj0gMC41LCAxLCAwKQ0KDQojIENvbmZ1c2lvbiBtYXRyaXgNCnRhYmxlKHRlc3QkZGlhYmV0ZXMsIHByZWRfbGluZWFyLCBkbm4gPSBjKCJObyBEaWFiZXRlcyIsICJEaWFiZXRlcyIpKQ0KDQojIEFjY3VyYWN5IFJhdGU6IDc2LjYyJQ0KKDg3KzMxKS8obGVuZ3RoKHByZWRfbGluZWFyKSkNCmBgYA0KDQpDcm9zcy12YWxpZGVkIExpbmVhciBSZWdyZXNzaW9uDQpgYGB7cn0NCg0KYGBg</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIlIgTm90ZWJvb2siDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQpHb2FsOiBQcmVkaWN0IERpYWJldGVzIEluY2lkZW5jZSBpbiBQaW1hIEluZGlhbnMNCg0KRGF0YSBMb2FkaW5nDQpgYGB7cn0NCmxpYnJhcnkoIm1sYmVuY2giKQ0KZGF0YSgiUGltYUluZGlhbnNEaWFiZXRlcyIpDQoNCiMgUmVuYW1lIERhdGENCmRhdGEgPSBQaW1hSW5kaWFuc0RpYWJldGVzDQpkYXRhDQoNCiMgU2V0IFNlZWQNCnNldC5zZWVkKDQxNSkNCg0KIyBTcGxpdCB0cmFpbmluZyBhbmQgdGVzdA0KaW5kZXggPSBzYW1wbGUoMTpucm93KGRhdGEpLCByb3VuZCgwLjgqbnJvdyhkYXRhKSkpDQp0cmFpbiA9IGRhdGFbaW5kZXgsXQ0KdGVzdCA9IGRhdGFbLWluZGV4LF0NCmBgYA0KDQpEYXRhIEluc3BlY3Rpb24NCmBgYHtyfQ0KIyBEYXRhIFByZXZpZXcNCmhlYWQoZGF0YSkNCg0KIyBUdXJuaW5nIERpYWJldGVzIGNvbHVtbiBpbnRvIGJpbmFyeSANCmRhdGEkZGlhYmV0ZXMgPSBpZmVsc2UoZGF0YSRkaWFiZXRlcyA9PSAicG9zIiwgMSwgMCkNCmRhdGEkZGlhYmV0ZXN0ID0gYXMuZmFjdG9yKGRhdGEkZGlhYmV0ZXMpDQoNCiMgQ2hlY2sgZm9yIE5BcyBpbiBjb2x1bW5zDQphcHBseShkYXRhLCAyLCBmdW5jdGlvbih4KSBzdW0oaXMubmEoeCkpKQ0KDQojIERlc2NyaXB0aXZlIE1lYXN1cmVzDQpzdW0oZGF0YSRkaWFiZXRlcyA9PSAwKSAjIDUwMCBvYnMNCnN1bShkYXRhJGRpYWJldGVzID09IDEpICMgMjY4IG9icw0KYGBgDQoNCk1vZGVsaW5nDQoNCkJhc2ljIExpbmVhciBSZWdyZXNzaW9uDQpgYGB7cn0NCiMgQnVpbGQgYmFzaWMgbGluZWFyIHJlZ3Jlc3Npb24NCmxpbmVhciA9IGxtKGRpYWJldGVzIH4uLCB0cmFpbikNCg0KIyBNYWtlIFByZWRpY3Rpb25zIGZyb20gYmFzaWMgbGluZWFyIG1vZGVsDQpwcmVkX2xpbmVhciA9IGlmZWxzZShwcmVkaWN0KGxpbmVhciwgdGVzdCwgdHlwZSA9ICJyZXNwb25zZSIpID49IDAuNSwgMSwgMCkNCg0KIyBDb25mdXNpb24gbWF0cml4DQp0YWJsZSh0ZXN0JGRpYWJldGVzLCBwcmVkX2xpbmVhciwgZG5uID0gYygiTm8gRGlhYmV0ZXMiLCAiRGlhYmV0ZXMiKSkNCg0KIyBBY2N1cmFjeSBSYXRlOiA3Ni42MiUNCig4NyszMSkvKGxlbmd0aChwcmVkX2xpbmVhcikpDQpgYGANClN0YXJ0ZWQgb2ZmIHdpdGggYW4gYWNjdXJhY3kgcmF0ZSBvZiBhcm91bmQgNzcgcGVyY2VudC4gDQoNCkNyb3NzLXZhbGlkZWQgTGluZWFyIFJlZ3Jlc3Npb24NCmBgYHtyfQ0KbGlicmFyeShjYXJldCkNCiMgU2V0IGNvbnRyb2wgcGFyYW1ldGVycyBmb3IgdHJhaW4NCmxtX2N0cmwgPSB0cmFpbkNvbnRyb2wobWV0aG9kID0gImN2IiwgbnVtYmVyID0gMTApDQoNCiMgQnVpbGQgY3Jvc3MtdmFsaWRhdGVkIGxpbmVhciBtb2RlbA0KY3YubGluZWFyID0gdHJhaW4oZGlhYmV0ZXN+LiwgZGF0YSA9IHRyYWluLCBtZXRob2QgPSAibG0iLCB0ckNvbnRyb2wgPSBsbV9jdHJsKQ0KDQojIE1ha2luZyBwcmVkaWN0aW9ucw0KcHJlZF9jdi5saW5lYXIgPSBpZmVsc2UocHJlZGljdChjdi5saW5lYXIsIHRlc3QpID49IDAuNSwgMSwgMCkNCg0KIyBDb25mdXNpb24gbWF0cml4DQp0YWJsZSh0ZXN0JGRpYWJldGVzLCBwcmVkX2N2LmxpbmVhciwgZG5uID0gYygiTm8gRGlhYmV0ZXMiLCAiRGlhYmV0ZXMiKSkNCg0KIyBBY2N1cmFjeSBSYXRlIGlzIHRoZSBzYW1lIGFzIGJhc2ljIGxpbmVhciByZWdyZXNzaW9uDQpgYGANClNhbWUgYWNjdXJhY3kgcmF0ZSBhcyByZWd1bGFyIGxpbmVhciByZWdyZXNzaW9uLiBPbiB0byBtb3JlIGFkdmFuY2VkIHRlY2huaXF1ZXMuDQoNClJhbmRvbSBGb3Jlc3QNCmBgYHtyfQ0KbGlicmFyeShyYW5kb21Gb3Jlc3QpDQoNCiMgU3BsaXR0aW5nIGRhdGEgaW50byB4IGFuZCB5IG1hdHJpY2VzDQp0cmFpbl95ID0gdHJhaW5bLDldDQp0cmFpbl94ID0gdHJhaW5bLC05XQ0KDQojIEJ1aWxkaW5nIGEgcmFuZG9tIGZvcmVzdA0KckZvcmVzdCA9IHJhbmRvbUZvcmVzdChkaWFiZXRlcyB+IC4sIGRhdGEgPSB0cmFpbikNCg0KIyBNYWtpbmcgcHJlZGljdGlvbnMNCnByZWRfcmYgPSBpZmVsc2UocHJlZGljdChyRm9yZXN0LCB0ZXN0KSA+PSAwLjUsIDEsIDApDQoNCiMgQ29uZnVzaW9uIE1hdHJpeA0KdGFibGUodGVzdCRkaWFiZXRlcywgcHJlZF9yZiwgZG5uID0gYygiTm8gRGlhYmV0ZXMiLCAiRGlhYmV0ZXMiKSkNCg0KIyBBY2N1cmFjeSBSYXRlDQooODcrMzUpLyhsZW5ndGgocHJlZF9yZikpDQpgYGANClVwIHRvIGEgNzklIGFjY3VyYWN5IHJhdGUgd2l0aCByYW5kb20gZm9yZXN0cy4NCg0KTmV1cmFsIE5ldA0KYGBge3J9DQpsaWJyYXJ5KG5ldXJhbG5ldCkNCg0KIyBTY2FsaW5nIERhdGENCm1heHMgPSBhcHBseShkYXRhLCAyLCBtYXgpDQptaW5zID0gYXBwbHkoZGF0YSwgMiwgbWluKQ0KDQpzY2FsZWQgPSBhcy5kYXRhLmZyYW1lKHNjYWxlKGRhdGEsIGNlbnRlciA9IG1pbnMsIHNjYWxlID0gbWF4cyAtIG1pbnMpKQ0KDQp0cmFpbl9zY2FsZWQgPSBzY2FsZWRbaW5kZXgsXQ0KdGVzdF9zY2FsZWQgPSBzY2FsZWRbLWluZGV4LF0NCg0KIyBCdWlsZGluZyBhIG5ldXJhbCBuZXQNCiMgVGhpcyBleGFtcGxlIGhhcyB0d28gaGlkZGVuIGxheWVyczsgNSBhbmQgMyBub2Rlcy4NCm4gPSBuYW1lcyh0cmFpbl9zY2FsZWQpDQpmID0gYXMuZm9ybXVsYShwYXN0ZSgiZGlhYmV0ZXMgfiIsIHBhc3RlKG5bIW4gJWluJSAiZGlhYmV0ZXMiXSwgY29sbGFwc2UgPSAiICsgIikpKQ0Kbm4gPSBuZXVyYWxuZXQoZiwgZGF0YSA9IHRyYWluX3NjYWxlZCwgaGlkZGVuID0gNiwgbGluZWFyLm91dHB1dCA9IEYpDQoNCiMgTWFraW5nIG5ldXJhbCBuZXQgcHJlZGljdGlvbnMNCnByZWRfbm5fdW5zY2FsZWQgPSBjb21wdXRlKG5uLCB0ZXN0X3NjYWxlZFssMTo4XSkNCnByZWRfbm5fcHJvYiA9IGlmZWxzZShwcmVkX25uX3Vuc2NhbGVkJG5ldC5yZXN1bHQqKG1heChkYXRhJGRpYWJldGVzKSAtIG1pbihkYXRhJGRpYWJldGVzKSkgKyBtaW4oZGF0YSRkaWFiZXRlcykgPj0gMC41LCAxLCAwKQ0KDQp0YWJsZSh0ZXN0JGRpYWJldGVzLCBwcmVkX25uX3Byb2IsIGRubiA9IGMoIk5vIERpYWJldGVzIiwgIkRpYWJldGVzIikpDQoNCiMgQWNjdXJhY3kgUmF0ZQ0KKDgwKzM0KS8obGVuZ3RoKHByZWRfbm5fcHJvYikpICMgNzQuMDI1JQ0KYGBgDQpBY2N1cmFjeSByYXRlIGhhcyBmYWxsZW4gd2l0aCBhIG5ldXJhbCBuZXQNCg0KTmV1cmFsIE5ldCB2Mg0KYGBge3J9DQojRml0IG1vZGVsDQpubjIgPSB0cmFpbihkaWFiZXRlc34uLCB0cmFpbl9zY2FsZWQsIG1ldGhvZD0nbm5ldCcsIGxpbm91dD1UUlVFLCB0cmFjZSA9IEZBTFNFLA0KICAgICAgICAgICAgICAgICNHcmlkIG9mIHR1bmluZyBwYXJhbWV0ZXJzIHRvIHRyeToNCiAgICAgICAgICAgICAgICB0dW5lR3JpZD1leHBhbmQuZ3JpZCguc2l6ZT02LC5kZWNheT1jKDAsMC4wMDEsMC4xKSkpIA0KDQp0ZW1wID0gcHJlZGljdChubjIsIHRlc3Rfc2NhbGVkKQ0KdGFibGUodGVzdCRkaWFiZXRlcywgdGVtcCwgZG5uID0gYygiTm8gRGlhYmV0ZXMiLCAiRGlhYmV0ZXMiKSkNCmBgYA==</div>
 
 
 

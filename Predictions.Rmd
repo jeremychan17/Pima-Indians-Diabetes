@@ -12,6 +12,7 @@ data("PimaIndiansDiabetes")
 
 # Rename Data
 data = PimaIndiansDiabetes
+data
 
 # Set Seed
 set.seed(415)
@@ -29,6 +30,7 @@ head(data)
 
 # Turning Diabetes column into binary 
 data$diabetes = ifelse(data$diabetes == "pos", 1, 0)
+data$diabetest = as.factor(data$diabetes)
 
 # Check for NAs in columns
 apply(data, 2, function(x) sum(is.na(x)))
@@ -54,8 +56,86 @@ table(test$diabetes, pred_linear, dnn = c("No Diabetes", "Diabetes"))
 # Accuracy Rate: 76.62%
 (87+31)/(length(pred_linear))
 ```
+Started off with an accuracy rate of around 77 percent. 
 
 Cross-valided Linear Regression
 ```{r}
+library(caret)
+# Set control parameters for train
+lm_ctrl = trainControl(method = "cv", number = 10)
 
+# Build cross-validated linear model
+cv.linear = train(diabetes~., data = train, method = "lm", trControl = lm_ctrl)
+
+# Making predictions
+pred_cv.linear = ifelse(predict(cv.linear, test) >= 0.5, 1, 0)
+
+# Confusion matrix
+table(test$diabetes, pred_cv.linear, dnn = c("No Diabetes", "Diabetes"))
+
+# Accuracy Rate is the same as basic linear regression
+```
+Same accuracy rate as regular linear regression. On to more advanced techniques.
+
+Random Forest
+```{r}
+library(randomForest)
+
+# Splitting data into x and y matrices
+train_y = train[,9]
+train_x = train[,-9]
+
+# Building a random forest
+rForest = randomForest(diabetes ~ ., data = train)
+
+# Making predictions
+pred_rf = ifelse(predict(rForest, test) >= 0.5, 1, 0)
+
+# Confusion Matrix
+table(test$diabetes, pred_rf, dnn = c("No Diabetes", "Diabetes"))
+
+# Accuracy Rate
+(87+35)/(length(pred_rf))
+```
+Up to a 79% accuracy rate with random forests.
+
+Neural Net
+```{r}
+library(neuralnet)
+
+# Scaling Data
+maxs = apply(data, 2, max)
+mins = apply(data, 2, min)
+
+scaled = as.data.frame(scale(data, center = mins, scale = maxs - mins))
+
+train_scaled = scaled[index,]
+test_scaled = scaled[-index,]
+
+# Building a neural net
+# This example has two hidden layers; 5 and 3 nodes.
+n = names(train_scaled)
+f = as.formula(paste("diabetes ~", paste(n[!n %in% "diabetes"], collapse = " + ")))
+nn = neuralnet(f, data = train_scaled, hidden = 6, linear.output = F)
+
+# Making neural net predictions
+pred_nn_unscaled = compute(nn, test_scaled[,1:8])
+pred_nn_prob = ifelse(pred_nn_unscaled$net.result*(max(data$diabetes) - min(data$diabetes)) + min(data$diabetes) >= 0.5, 1, 0)
+
+table(test$diabetes, pred_nn_prob, dnn = c("No Diabetes", "Diabetes"))
+
+# Accuracy Rate
+(80+34)/(length(pred_nn_prob)) # 74.025%
+```
+Accuracy rate has fallen with a neural net
+
+Neural Net v2
+```{r}
+#Fit model
+nn2 = train(diabetes~., train_scaled, method='nnet', linout=TRUE, trace = FALSE,
+                #Grid of tuning parameters to try:
+                tuneGrid=expand.grid(.size=6,.decay=c(0,0.001,0.1))) 
+
+temp = predict(nn2, test_scaled)
+table(test$diabetes, temp, dnn = c("No Diabetes", "Diabetes"))
 ```
