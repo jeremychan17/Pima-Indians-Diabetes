@@ -1,0 +1,61 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Goal: Predict Diabetes Incidence in Pima Indians
+
+Data Loading
+```{r}
+library("mlbench")
+data("PimaIndiansDiabetes")
+
+# Rename Data
+data = PimaIndiansDiabetes
+
+# Set Seed
+set.seed(415)
+
+# Split training and test
+index = sample(1:nrow(data), round(0.8*nrow(data)))
+train = data[index,]
+test = data[-index,]
+```
+
+Data Inspection
+```{r}
+# Data Preview
+head(data)
+
+# Turning Diabetes column into binary 
+data$diabetes = ifelse(data$diabetes == "pos", 1, 0)
+
+# Check for NAs in columns
+apply(data, 2, function(x) sum(is.na(x)))
+
+# Descriptive Measures
+sum(data$diabetes == 0) # 500 obs
+sum(data$diabetes == 1) # 268 obs
+```
+
+Modeling
+
+Basic Linear Regression
+```{r}
+# Build basic linear regression
+linear = lm(diabetes ~., train)
+
+# Make Predictions from basic linear model
+pred_linear = ifelse(predict(linear, test, type = "response") >= 0.5, 1, 0)
+
+# Confusion matrix
+table(test$diabetes, pred_linear, dnn = c("No Diabetes", "Diabetes"))
+
+# Accuracy Rate: 76.62%
+(87+31)/(length(pred_linear))
+```
+
+Cross-valided Linear Regression
+```{r}
+
+```
